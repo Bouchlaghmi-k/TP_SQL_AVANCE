@@ -140,3 +140,28 @@ from users u
 left join payments p on u.id = p.user_id
 where p.user_id is null;
 
+select 
+    c.titre,
+    avg(e.progress) as avg_progress
+from courses c
+join enrollments e on c.id = e.course_id
+group by c.id, c.titre;
+
+select 
+    u.nom,
+    c.titre,
+    e.progress
+from enrollments e
+join users u on e.user_id = u.id
+join courses c on e.course_id = c.id
+where e.progress < 25;
+
+select 
+    c.titre,
+    avg(e.progress) as avg_progress,
+    count(*) as nb_inscrits
+from courses c
+join enrollments e on c.id = e.course_id
+group by c.id, c.titre
+having avg(e.progress) < 50 and count(*) >= 3;
+
