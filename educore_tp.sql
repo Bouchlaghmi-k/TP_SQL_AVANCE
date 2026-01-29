@@ -110,4 +110,33 @@ select *
 from payments
 where amount <= 0;
 
+select 
+    c.titre,
+    count(e.user_id) as nb_inscrits
+from courses c
+join enrollments e on c.id = e.course_id
+group by c.id, c.titre
+order by nb_inscrits desc;
+
+select 
+    c.titre,
+    sum(c.prix) as revenu_total
+from courses c
+join enrollments e on c.id = e.course_id
+group by c.id, c.titre
+order by revenu_total desc;
+
+select 
+    user_id,
+    count(*) as nb_paiements
+from payments
+group by user_id
+having count(*) >= 2;
+
+
+select 
+    u.nom
+from users u
+left join payments p on u.id = p.user_id
+where p.user_id is null;
 
