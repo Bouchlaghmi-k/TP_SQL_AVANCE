@@ -1,16 +1,23 @@
+-- mission1 : création de la base et des tables
 create database educore;
 use educore;
+
+-- table des utilisateurs
 create table users (
 id int primary key ,
 nom varchar(255) not null,
 email varchar(200) unique not null,
-created_at datetime default current_timestamp );
+created_at datetime default current_timestamp
+);
+
+-- table des cours
 create table courses(
 id int ,
 titre varchar(255),
 prix decimal check(prix>0)
-
 );
+
+-- table des inscriptions
 create table enrollments(
 user_id int ,
 course_id int,
@@ -19,23 +26,35 @@ check (progress between 0 and 100),
 foreign key (course_id) references courses(id),
 foreign key (user_id) references users(id)
 );
+
+-- table des paiements
 create table payments (
 id int,
 amount decimal,
 paid_at datetime default current_timestamp
 );
-alter table payments
 
+-- ajout de la contrainte de clé étrangère sur user_id
+alter table payments
 ADD CONSTRAINT fk_payments_user
     FOREIGN KEY (user_id) REFERENCES users(id);
 
+-- nettoyage de la table payments
 truncate table payments;
+
+-- description de la table payments
 DESCRIBE payments;
+
+-- insertion d'un utilisateur
 insert into users(id, nom, email) values ( '1','douae', 'sdouae@gmail.com');
+
+-- tentative d'insertion avec seulement email
 insert into users (email) values ('sdouae@gmail.com');
+
+-- insertion dans enrollments avec une valeur de progress
 insert into enrollments (progress) values ('111');
 
-
+-- mission 2 : insertion de plusieurs utilisateurs
 insert into users( nom, email) values 
 ( 'souphyane', 'bsouphayne@gmail.com'),
 ( 'sini', 'hmohammedamine@gmail.com'),
@@ -47,16 +66,16 @@ insert into users( nom, email) values
 ('maddison','jmaddison@gmail.com'),
 ('dominic','sdominic@gmail.com');
 
-
+-- insertion des cours
 insert into courses (id, titre, prix)values
 (1, 'Web Development (HTML, CSS, JavaScript)', 199),
 (2, 'Java Programming Fundamentals', 249),
 (3, 'Python for Data Science', 299),
 (4, 'Full Stack Development (MERN)', 399),
 (5, 'Cybersecurity Basics', 279),
-(6, 'Mobile App Development', 349)
-;
+(6, 'Mobile App Development', 349);
 
+-- insertion des inscriptions
 insert into enrollments (user_id, course_id, progress) values
 (1, 1, 20),
 (1, 4, 40),
@@ -74,6 +93,7 @@ insert into enrollments (user_id, course_id, progress) values
 (5, 5, 55),
 (5, 6, 75);
 
+-- insertion des paiements
 insert into payments ( user_id, amount) values
 ( 1, 199),
 (1, 249),
@@ -86,7 +106,7 @@ insert into payments ( user_id, amount) values
 ( 5, 299),
 ( 5, 399);
 
-
+-- vérification du nombre de lignes dans chaque table
 select 'users' as table_name, COUNT(*) as total from users
 union all
 select 'courses', COUNT(*) from courses
@@ -95,21 +115,25 @@ select 'enrollments', COUNT(*) from enrollments
 union all
 select 'payments', COUNT(*) from payments;
 
+-- vérification des progress hors limites
 select * 
 from enrollments
 where progress < 0 or progress > 100;
 
+-- vérification des enrollments liés à des users ou cours inexistants
 select e.*
 from enrollments e
 left join users u on e.user_id = u.id
 left join courses c on e.course_id = c.id
 where u.id is null or c.id is null;
 
-
+-- vérification des paiements négatifs ou nuls
 select *
 from payments
 where amount <= 0;
 
+-- mission 3 : analyse des cours et paiements
+-- cours les plus suivis
 select 
     c.titre,
     count(e.user_id) as nb_inscrits
@@ -118,6 +142,7 @@ join enrollments e on c.id = e.course_id
 group by c.id, c.titre
 order by nb_inscrits desc;
 
+-- cours les plus rentables (approche simple)
 select 
     c.titre,
     sum(c.prix) as revenu_total
@@ -126,6 +151,7 @@ join enrollments e on c.id = e.course_id
 group by c.id, c.titre
 order by revenu_total desc;
 
+-- utilisateurs avec au moins 2 paiements
 select 
     user_id,
     count(*) as nb_paiements
@@ -133,13 +159,15 @@ from payments
 group by user_id
 having count(*) >= 2;
 
-
+-- utilisateurs n'ayant jamais payé
 select 
     u.nom
 from users u
 left join payments p on u.id = p.user_id
 where p.user_id is null;
 
+-- mission 4 : progression par cours et utilisateurs
+-- progression moyenne par cours
 select 
     c.titre,
     avg(e.progress) as avg_progress
@@ -147,6 +175,7 @@ from courses c
 join enrollments e on c.id = e.course_id
 group by c.id, c.titre;
 
+-- identification des abandons (progress < 25)
 select 
     u.nom,
     c.titre,
@@ -156,6 +185,7 @@ join users u on e.user_id = u.id
 join courses c on e.course_id = c.id
 where e.progress < 25;
 
+-- cours "à risque" : moyenne < 50 et au moins 3 inscrits
 select 
     c.titre,
     avg(e.progress) as avg_progress,
@@ -164,4 +194,3 @@ from courses c
 join enrollments e on c.id = e.course_id
 group by c.id, c.titre
 having avg(e.progress) < 50 and count(*) >= 3;
-
