@@ -289,3 +289,36 @@ order by nb_inscrits desc;
 
 -- test
 select * from v_popular_courses;
+
+-- mission 7 : performance & index
+
+-- etape 1 : requetes lentes à analyser avec EXPLAIN
+
+-- recherche d'un user par email
+explain select * from users where email = 'sdouae@gmail.com';
+
+-- paiements par date
+explain select * from payments where paid_at between '2026-01-01' and '2026-01-31';
+
+-- enrollments d'un cours
+explain select * from enrollments where course_id = 2;
+
+-- etape 2 : creation des index pertinents
+
+-- index sur email pour recherche rapide dans users
+create index idx_users_email on users(email);
+
+-- index sur paid_at pour requetes temporelles dans payments
+create index idx_payments_paid_at on payments(paid_at);
+
+-- index composite pour rechercher enrollments par course et user
+create index idx_enrollments_course_user on enrollments(course_id, user_id);
+
+-- etape 3 : verification
+
+-- refaire EXPLAIN pour la meme requete
+explain select * from users where email = 'sdouae@gmail.com';
+explain select * from payments where paid_at between '2026-01-01' and '2026-01-31';
+explain select * from enrollments where course_id = 2;
+
+
