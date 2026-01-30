@@ -1,69 +1,69 @@
--- mission1 : création de la base et des tables
-create database educore;
-use educore;
+-- MISSION 1 : CRÉATION DE LA BASE ET DES TABLES
+CREATE DATABASE educore;
+USE educore;
 
--- table des utilisateurs
-create table users (
-id int primary key ,
-nom varchar(255) not null,
-email varchar(200) unique not null,
-created_at datetime default current_timestamp
+-- TABLE DES UTILISATEURS
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    nom VARCHAR(255) NOT NULL,
+    email VARCHAR(200) UNIQUE NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- table des cours
-create table courses(
-id int ,
-titre varchar(255),
-prix decimal check(prix>0)
+-- TABLE DES COURS
+CREATE TABLE courses (
+    id INT,
+    titre VARCHAR(255),
+    prix DECIMAL CHECK (prix > 0)
 );
 
--- table des inscriptions
-create table enrollments(
-user_id int ,
-course_id int,
-progress int default 0 ,
-check (progress between 0 and 100),
-foreign key (course_id) references courses(id),
-foreign key (user_id) references users(id)
+-- TABLE DES INSCRIPTIONS
+CREATE TABLE enrollments (
+    user_id INT,
+    course_id INT,
+    progress INT DEFAULT 0,
+    CHECK (progress BETWEEN 0 AND 100),
+    FOREIGN KEY (course_id) REFERENCES courses(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- table des paiements
-create table payments (
-id int,
-amount decimal,
-paid_at datetime default current_timestamp,
-foreign key (user_id) references users(id)
+-- TABLE DES PAIEMENTS
+CREATE TABLE payments (
+    id INT,
+    amount DECIMAL,
+    paid_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-
-
-
--- description de la table payments
+-- DESCRIPTION DE LA TABLE PAYMENTS
 DESCRIBE payments;
 
--- insertion d'un utilisateur
-insert into users(id, nom, email) values ( '1','douae', 'sdouae@gmail.com');
+-- INSERTION D'UN UTILISATEUR
+INSERT INTO users (id, nom, email)
+VALUES (1, 'douae', 'sdouae@gmail.com');
 
--- tentative d'insertion un email en double
-insert into users (email) values ('sdouae@gmail.com');
+-- TENTATIVE D'INSERTION D'UN EMAIL EN DOUBLE
+INSERT INTO users (email)
+VALUES ('sdouae@gmail.com');
 
--- insertion dans enrollments avec une valeur de progress = 120
-insert into enrollments (progress) values ('120');
+-- INSERTION DANS ENROLLMENTS AVEC UNE VALEUR DE PROGRESS = 120
+INSERT INTO enrollments (progress)
+VALUES (120);
 
--- mission 2 : insertion de plusieurs utilisateurs
-insert into users( nom, email) values 
-( 'souphyane', 'bsouphayne@gmail.com'),
-( 'sini', 'hmohammedamine@gmail.com'),
-( 'othmane', 'ycothmane@gmail.com'),
-('yassine','hyassine@gmail.com'),
-('ilyass','kilyass@gmail.com'),
-('yasmine','yasmine@gmail.com'),
-('manal','manal@gmail.com'),
-('maddison','jmaddison@gmail.com'),
-('dominic','sdominic@gmail.com');
+-- MISSION 2 : INSERTION DE PLUSIEURS UTILISATEURS
+INSERT INTO users (nom, email) VALUES
+('souphyane', 'bsouphayne@gmail.com'),
+('sini', 'hmohammedamine@gmail.com'),
+('othmane', 'ycothmane@gmail.com'),
+('yassine', 'hyassine@gmail.com'),
+('ilyass', 'kilyass@gmail.com'),
+('yasmine', 'yasmine@gmail.com'),
+('manal', 'manal@gmail.com'),
+('maddison', 'jmaddison@gmail.com'),
+('dominic', 'sdominic@gmail.com');
 
--- insertion des cours
-insert into courses (id, titre, prix)values
+-- INSERTION DES COURS
+INSERT INTO courses (id, titre, prix) VALUES
 (1, 'Web Development (HTML, CSS, JavaScript)', 199),
 (2, 'Java Programming Fundamentals', 249),
 (3, 'Python for Data Science', 299),
@@ -71,8 +71,8 @@ insert into courses (id, titre, prix)values
 (5, 'Cybersecurity Basics', 279),
 (6, 'Mobile App Development', 349);
 
--- insertion des inscriptions
-insert into enrollments (user_id, course_id, progress) values
+-- INSERTION DES INSCRIPTIONS
+INSERT INTO enrollments (user_id, course_id, progress) VALUES
 (1, 1, 20),
 (1, 4, 40),
 (1, 3, 60),
@@ -89,275 +89,154 @@ insert into enrollments (user_id, course_id, progress) values
 (5, 5, 55),
 (5, 6, 75);
 
--- insertion des paiements
-insert into payments ( user_id, amount) values
-( 1, 199),
+-- INSERTION DES PAIEMENTS
+INSERT INTO payments (user_id, amount) VALUES
+(1, 199),
 (1, 249),
-( 2, 399),
-( 2, 199),
-( 3, 299),
-( 3, 279),
+(2, 399),
+(2, 199),
+(3, 299),
+(3, 279),
 (4, 349),
-( 4, 199),
-( 5, 299),
-( 5, 399);
+(4, 199),
+(5, 299),
+(5, 399);
 
--- compter chaque table
-select 'users' as table_name, COUNT(*) as total from users
-union all
-select 'courses', COUNT(*) from courses
-union all
-select 'enrollments', COUNT(*) from enrollments
-union all
-select 'payments', COUNT(*) from payments;
+-- COMPTER CHAQUE TABLE
+SELECT 'users' AS table_name, COUNT(*) AS total FROM users
+UNION ALL
+SELECT 'courses', COUNT(*) FROM courses
+UNION ALL
+SELECT 'enrollments', COUNT(*) FROM enrollments
+UNION ALL
+SELECT 'payments', COUNT(*) FROM payments;
 
--- vérification des progress hors limites
-select * 
-from enrollments
-where progress < 0 or progress > 100;
+-- VÉRIFICATION DES PROGRESS HORS LIMITES
+SELECT *
+FROM enrollments
+WHERE progress < 0 OR progress > 100;
 
--- vérification que chaque enrollment pointe un user et un course existants
-select e.*
-from enrollments e
-left join users u on e.user_id = u.id
-left join courses c on e.course_id = c.id
-where u.id is null or c.id is null;
+-- VÉRIFICATION QUE CHAQUE ENROLLMENT POINTE UN USER ET UN COURSE EXISTANTS
+SELECT e.*
+FROM enrollments e
+LEFT JOIN users u ON e.user_id = u.id
+LEFT JOIN courses c ON e.course_id = c.id
+WHERE u.id IS NULL OR c.id IS NULL;
 
--- vérification que les montants sont positifs
-select *
-from payments
-where amount <= 0;
+-- VÉRIFICATION QUE LES MONTANTS SONT POSITIFS
+SELECT *
+FROM payments
+WHERE amount <= 0;
 
--- mission 3 : analyse des cours et paiements
--- cours les plus suivis
-select 
+-- MISSION 3 : ANALYSE DES COURS ET PAIEMENTS
+-- COURS LES PLUS SUIVIS
+SELECT
     c.titre,
-    count(e.user_id) as nb_inscrits
-from courses c
-join enrollments e on c.id = e.course_id
-group by c.id, c.titre
-order by nb_inscrits desc;
+    COUNT(e.user_id) AS nb_inscrits
+FROM courses c
+JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id, c.titre
+ORDER BY nb_inscrits DESC;
 
--- cours les plus rentables (approche simple)
-select 
+-- COURS LES PLUS RENTABLES (APPROCHE SIMPLE)
+SELECT
     c.titre,
-    sum(c.prix) as revenu_total
-from courses c
-join enrollments e on c.id = e.course_id
-group by c.id, c.titre
-order by revenu_total desc;
+    SUM(c.prix) AS revenu_total
+FROM courses c
+JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id, c.titre
+ORDER BY revenu_total DESC;
 
--- utilisateurs avec au moins 2 paiements
-select 
+-- UTILISATEURS AVEC AU MOINS 2 PAIEMENTS
+SELECT
     user_id,
-    count(*) as nb_paiements
-from payments
-group by user_id
-having count(*) >= 2;
+    COUNT(*) AS nb_paiements
+FROM payments
+GROUP BY user_id
+HAVING COUNT(*) >= 2;
 
--- utilisateurs n'ayant jamais payé
-select 
+-- UTILISATEURS N'AYANT JAMAIS PAYÉ
+SELECT
     u.nom
-from users u
-left join payments p on u.id = p.user_id
-where p.user_id is null;
+FROM users u
+LEFT JOIN payments p ON u.id = p.user_id
+WHERE p.user_id IS NULL;
 
--- mission 4 : progression par cours et utilisateurs
--- progression moyenne par cours
-select 
+-- MISSION 4 : PROGRESSION PAR COURS ET UTILISATEURS
+-- PROGRESSION MOYENNE PAR COURS
+SELECT
     c.titre,
-    avg(e.progress) as avg_progress
-from courses c
-join enrollments e on c.id = e.course_id
-group by c.id, c.titre;
+    AVG(e.progress) AS avg_progress
+FROM courses c
+JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id, c.titre;
 
--- identification des abandons (progress < 25)
-select 
+-- IDENTIFICATION DES ABANDONS (PROGRESS < 25)
+SELECT
     u.nom,
     c.titre,
     e.progress
-from enrollments e
-join users u on e.user_id = u.id
-join courses c on e.course_id = c.id
-where e.progress < 25;
+FROM enrollments e
+JOIN users u ON e.user_id = u.id
+JOIN courses c ON e.course_id = c.id
+WHERE e.progress < 25;
 
--- cours "à risque" : moyenne < 50 et au moins 3 inscrits
-select 
+-- COURS "À RISQUE"
+SELECT
     c.titre,
-    avg(e.progress) as avg_progress,
-    count(*) as nb_inscrits
-from courses c
-join enrollments e on c.id = e.course_id
-group by c.id, c.titre
-having avg(e.progress) < 50 and count(*) >= 3;
+    AVG(e.progress) AS avg_progress,
+    COUNT(*) AS nb_inscrits
+FROM courses c
+JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id, c.titre
+HAVING AVG(e.progress) < 50 AND COUNT(*) >= 3;
 
--- mission 5 : sous-requêtes & logique avancée
-
--- etape 1 : depense totale par user
-select
+-- MISSION 5 : SOUS-REQUÊTES & LOGIQUE AVANCÉE
+SELECT
     user_id,
-    sum(amount) as total_spent
-from payments
-group by user_id;
+    SUM(amount) AS total_spent
+FROM payments
+GROUP BY user_id;
 
--- etape 2 : users dont la depense totale est superieure a la moyenne
-select
-    p.user_id,
-    sum(p.amount) as total_spent
-from payments p
-group by p.user_id
-having sum(p.amount) >
-(
-    select avg(total_user_spent)
-    from (
-        select sum(amount) as total_user_spent
-        from payments
-        group by user_id
-    ) t
-);
-
--- etape 3 : cours plus chers que la moyenne des prix
-select
-    titre,
-    prix
-from courses
-where prix >
-(
-    select avg(prix)
-    from courses
-);
-
--- etape 4 : users inscrits a au moins 2 cours
-select
-    u.nom,
-    count(e.course_id) as nb_courses
-from users u
-join enrollments e on u.id = e.user_id
-group by u.id, u.nom
-having count(e.course_id) >= 2;
-
--- etape 5 : cours jamais achetes 
-
--- on cherche les cours qui ont des inscrits
--- mais dont les users inscrits n'ont fait aucun paiement
-
-select
-    c.titre
-from courses c
-join enrollments e on c.id = e.course_id
-left join payments p on e.user_id = p.user_id
-group by c.id, c.titre
-having count(p.user_id) = 0;
-
--- mission 6 : vues metier
-
--- etape 1 : vue des users actifs (au moins 1 enrollment)
-create view v_active_users as
-select distinct
+-- MISSION 6 : VUES MÉTIER
+CREATE VIEW v_active_users AS
+SELECT DISTINCT
     u.id,
     u.nom,
     u.email
-from users u
-join enrollments e on u.id = e.user_id;
+FROM users u
+JOIN enrollments e ON u.id = e.user_id;
 
--- test
-select * from v_active_users;
+CREATE VIEW v_monthly_revenue AS
+SELECT
+    DATE_FORMAT(paid_at, '%y-%m') AS month,
+    SUM(amount) AS monthly_revenue
+FROM payments
+GROUP BY DATE_FORMAT(paid_at, '%y-%m');
 
-
--- etape 2 : vue du chiffre d'affaires mensuel
-create view v_monthly_revenue as
-select
-    date_format(paid_at, '%y-%m') as month,
-    sum(amount) as monthly_revenue
-from payments
-group by date_format(paid_at, '%y-%m');
-
--- test
-select * from v_monthly_revenue;
-
-
--- etape 3 : vue des cours populaires (par nombre d'inscriptions)
-create view v_popular_courses as
-select
+CREATE VIEW v_popular_courses AS
+SELECT
     c.id,
     c.titre,
-    count(e.user_id) as nb_inscrits
-from courses c
-join enrollments e on c.id = e.course_id
-group by c.id, c.titre
-order by nb_inscrits desc;
+    COUNT(e.user_id) AS nb_inscrits
+FROM courses c
+JOIN enrollments e ON c.id = e.course_id
+GROUP BY c.id, c.titre
+ORDER BY nb_inscrits DESC;
 
--- test
-select * from v_popular_courses;
+-- MISSION 7 : PERFORMANCE & INDEX
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_payments_paid_at ON payments(paid_at);
+CREATE INDEX idx_enrollments_course_user ON enrollments(course_id, user_id);
 
--- mission 7 : performance & index
+-- MISSION 8 : TRANSACTIONS & SÉCURITÉ
+START TRANSACTION;
 
--- etape 1 : requetes lentes à analyser avec EXPLAIN
+INSERT INTO payments (user_id, amount)
+VALUES (1, 199);
 
--- recherche d'un user par email
-explain select * from users where email = 'sdouae@gmail.com';
+UPDATE users
+SET nom = CONCAT(nom, ' (client)')
+WHERE id = 1;
 
--- paiements par date
-explain select * from payments where paid_at between '2026-01-01' and '2026-01-31';
-
--- enrollments d'un cours
-explain select * from enrollments where course_id = 2;
-
--- etape 2 : creation des index pertinents
-
--- index sur email pour recherche rapide dans users
-create index idx_users_email on users(email);
-
--- index sur paid_at pour requetes temporelles dans payments
-create index idx_payments_paid_at on payments(paid_at);
-
--- index composite pour rechercher enrollments par course et user
-create index idx_enrollments_course_user on enrollments(course_id, user_id);
-
--- etape 3 : verification
-
--- refaire EXPLAIN pour la meme requete
-explain select * from users where email = 'sdouae@gmail.com';
-explain select * from payments where paid_at between '2026-01-01' and '2026-01-31';
-explain select * from enrollments where course_id = 2;
-
--- mission 8 : transactions & securite
-
--- etape 1 : transaction de paiement valide
-
-start transaction;
-
--- insertion d'un paiement
-insert into payments (user_id, amount)
-values (1, 199);
-
--- operation metier simulee (ex : mise a jour user)
-update users
-set nom = concat(nom, ' (client)')
-where id = 1;
-
--- validation de la transaction
-commit;
-
-
--- etape 2 : transaction avec erreur + rollback partiel
-
-start transaction;
-
--- creation d'un point de sauvegarde
-savepoint sp_paiement;
-
--- insertion valide
-insert into payments (user_id, amount)
-values (2, 249);
-
--- requete invalide (violation contrainte : montant negatif)
-insert into payments (user_id, amount)
-values (2, -100);
-
--- annulation jusqu'au point de sauvegarde
-rollback to sp_paiement;
-
--- validation finale
-commit;
-
+COMMIT;
