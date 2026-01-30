@@ -249,3 +249,43 @@ left join payments p on e.user_id = p.user_id
 group by c.id, c.titre
 having count(p.user_id) = 0;
 
+-- mission 6 : vues metier
+
+-- etape 1 : vue des users actifs (au moins 1 enrollment)
+create view v_active_users as
+select distinct
+    u.id,
+    u.nom,
+    u.email
+from users u
+join enrollments e on u.id = e.user_id;
+
+-- test
+select * from v_active_users;
+
+
+-- etape 2 : vue du chiffre d'affaires mensuel
+create view v_monthly_revenue as
+select
+    date_format(paid_at, '%y-%m') as month,
+    sum(amount) as monthly_revenue
+from payments
+group by date_format(paid_at, '%y-%m');
+
+-- test
+select * from v_monthly_revenue;
+
+
+-- etape 3 : vue des cours populaires (par nombre d'inscriptions)
+create view v_popular_courses as
+select
+    c.id,
+    c.titre,
+    count(e.user_id) as nb_inscrits
+from courses c
+join enrollments e on c.id = e.course_id
+group by c.id, c.titre
+order by nb_inscrits desc;
+
+-- test
+select * from v_popular_courses;
