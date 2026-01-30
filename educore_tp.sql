@@ -31,16 +31,12 @@ foreign key (user_id) references users(id)
 create table payments (
 id int,
 amount decimal,
-paid_at datetime default current_timestamp
+paid_at datetime default current_timestamp,
+foreign key (user_id) references users(id)
 );
 
--- ajout de la contrainte de clé étrangère sur user_id
-alter table payments
-ADD CONSTRAINT fk_payments_user
-    FOREIGN KEY (user_id) REFERENCES users(id);
 
--- nettoyage de la table payments
-truncate table payments;
+
 
 -- description de la table payments
 DESCRIBE payments;
@@ -48,11 +44,11 @@ DESCRIBE payments;
 -- insertion d'un utilisateur
 insert into users(id, nom, email) values ( '1','douae', 'sdouae@gmail.com');
 
--- tentative d'insertion avec seulement email
+-- tentative d'insertion un email en double
 insert into users (email) values ('sdouae@gmail.com');
 
--- insertion dans enrollments avec une valeur de progress
-insert into enrollments (progress) values ('111');
+-- insertion dans enrollments avec une valeur de progress = 120
+insert into enrollments (progress) values ('120');
 
 -- mission 2 : insertion de plusieurs utilisateurs
 insert into users( nom, email) values 
@@ -106,7 +102,7 @@ insert into payments ( user_id, amount) values
 ( 5, 299),
 ( 5, 399);
 
--- vérification du nombre de lignes dans chaque table
+-- compter chaque table
 select 'users' as table_name, COUNT(*) as total from users
 union all
 select 'courses', COUNT(*) from courses
@@ -120,14 +116,14 @@ select *
 from enrollments
 where progress < 0 or progress > 100;
 
--- vérification des enrollments liés à des users ou cours inexistants
+-- vérification que chaque enrollment pointe un user et un course existants
 select e.*
 from enrollments e
 left join users u on e.user_id = u.id
 left join courses c on e.course_id = c.id
 where u.id is null or c.id is null;
 
--- vérification des paiements négatifs ou nuls
+-- vérification que les montants sont positifs
 select *
 from payments
 where amount <= 0;
@@ -194,3 +190,62 @@ from courses c
 join enrollments e on c.id = e.course_id
 group by c.id, c.titre
 having avg(e.progress) < 50 and count(*) >= 3;
+
+-- mission 5 : sous-requêtes & logique avancée
+
+-- etape 1 : depense totale par user
+select
+    user_id,
+    sum(amount) as total_spent
+from payments
+group by user_id;
+
+-- etape 2 : users dont la depense totale est superieure a la moyenne
+select
+    p.user_id,
+    sum(p.amount) as total_spent
+from payments p
+group by p.user_id
+having sum(p.amount) >
+(
+    select avg(total_user_spent)
+    from (
+        select sum(amount) as total_user_spent
+        from payments
+        group by user_id
+    ) t
+);
+
+-- etape 3 : cours plus chers que la moyenne des prix
+select
+    titre,
+    prix
+from courses
+where prix >
+(
+    select avg(prix)
+    from courses
+);
+
+-- etape 4 : users inscrits a au moins 2 cours
+select
+    u.nom,
+    count(e.course_id) as nb_courses
+from users u
+join enrollments e on u.id = e.user_id
+group by u.id, u.nom
+having count(e.course_id) >= 2;
+
+-- etape 5 : cours jamais achetes 
+
+-- on cherche les cours qui ont des inscrits
+-- mais dont les users inscrits n'ont fait aucun paiement
+
+select
+    c.titre
+from courses c
+join enrollments e on c.id = e.course_id
+left join payments p on e.user_id = p.user_id
+group by c.id, c.titre
+having count(p.user_id) = 0;
+
