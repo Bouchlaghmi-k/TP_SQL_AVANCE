@@ -321,4 +321,43 @@ explain select * from users where email = 'sdouae@gmail.com';
 explain select * from payments where paid_at between '2026-01-01' and '2026-01-31';
 explain select * from enrollments where course_id = 2;
 
+-- mission 8 : transactions & securite
+
+-- etape 1 : transaction de paiement valide
+
+start transaction;
+
+-- insertion d'un paiement
+insert into payments (user_id, amount)
+values (1, 199);
+
+-- operation metier simulee (ex : mise a jour user)
+update users
+set nom = concat(nom, ' (client)')
+where id = 1;
+
+-- validation de la transaction
+commit;
+
+
+-- etape 2 : transaction avec erreur + rollback partiel
+
+start transaction;
+
+-- creation d'un point de sauvegarde
+savepoint sp_paiement;
+
+-- insertion valide
+insert into payments (user_id, amount)
+values (2, 249);
+
+-- requete invalide (violation contrainte : montant negatif)
+insert into payments (user_id, amount)
+values (2, -100);
+
+-- annulation jusqu'au point de sauvegarde
+rollback to sp_paiement;
+
+-- validation finale
+commit;
 
